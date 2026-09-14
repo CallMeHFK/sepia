@@ -124,7 +124,7 @@ class SepiaPlugin:
                 "[--op write|review|refactor|recreate|hemingway] "
                 "[--lang en|zh]"
             ),
-            metadata={"source": "sepia", "version": "0.10.0"},
+            metadata={"source": "sepia", "version": "1.0.0"},
         )
 
 
