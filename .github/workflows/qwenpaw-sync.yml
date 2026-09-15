@@ -1,6 +1,6 @@
 name: qwenpaw bundle sync
 
-# The QwenPaw bundle under qwenpaw-plugin/skills/ must stay byte-identical to
+# The QwenPaw bundle under .qwenpaw-plugin/skills/ must stay byte-identical to
 # the canonical skills/ tree. sync_skills.py is standard-library Python, so
 # there is nothing to install and no lockfile to keep current.
 
@@ -19,4 +19,4 @@ jobs:
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
       - name: byte parity between qwenpaw bundle and skills/
-        run: python3 qwenpaw-plugin/sync_skills.py --check
+        run: python3 .qwenpaw-plugin/sync_skills.py --check
