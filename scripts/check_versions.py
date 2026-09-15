@@ -58,6 +58,7 @@ MANIFEST_NAMES = {"plugin.json", "marketplace.json"}
 REQUIRED = (
     ".claude-plugin/plugin.json",
     ".codex-plugin/plugin.json",
+    ".qwenpaw-plugin/plugin.json",
     "skills/sepia/SKILL.md",
 )
 

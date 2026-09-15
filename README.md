@@ -123,11 +123,11 @@ agy plugin install https://github.com/Nanako0129/sepia
 
 ```bash
 # install from the local plugin bundle, then hot-reload
-qwenpaw plugin install ./qwenpaw-plugin
-qwenpaw plugin list          # sepia should appear at v0.10.0
+qwenpaw plugin install ./.qwenpaw-plugin
+qwenpaw plugin list          # sepia should appear at v1.0.0
 ```
 
-The QwenPaw bundle lives in `qwenpaw-plugin/` and ships the same six skills byte-for-byte, plus a `/sepia` router command. `qwenpaw-plugin/sync_skills.py` keeps the bundle in parity with `skills/` and runs in CI (`.github/workflows/qwenpaw-sync.yml`).
+The QwenPaw bundle lives in `.qwenpaw-plugin/` and ships the same six skills byte-for-byte, plus a `/sepia` router command. `.qwenpaw-plugin/sync_skills.py` keeps the bundle in parity with `skills/` and runs in CI (`.github/workflows/qwenpaw-sync.yml`).
 
 ### Project scope (alternative)
 
@@ -171,7 +171,7 @@ sepia/
 ├── .claude-plugin/          # Claude Code packaging (plugin.json, marketplace.json)
 ├── .codex-plugin/           # Codex packaging
 ├── .agents/                 # Codex/Antigravity workspace-mode discovery + Antigravity workflow
-├── qwenpaw-plugin/          # QwenPaw packaging (plugin.json, plugin.py, sync_skills.py, bundled skills/)
+├── .qwenpaw-plugin/          # QwenPaw packaging (plugin.json, plugin.py, sync_skills.py, bundled skills/)
 └── research/                # digested evidence base with sources
 ```
 

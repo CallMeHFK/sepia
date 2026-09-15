@@ -3,7 +3,7 @@
 
 Copies the six skill directories (canonical router + five operation
 shells) from the upstream repo's ``skills/`` into
-``qwenpaw-plugin/skills/``, then verifies byte parity (relative paths +
+``.qwenpaw-plugin/skills/``, then verifies byte parity (relative paths +
 sha256). Idempotent: re-running yields identical output. Exits non-zero
 if the upstream tree is missing or a verification mismatch is found, so
 CI (``.github/workflows/qwenpaw-sync.yml``) blocks on drift between the
@@ -12,9 +12,9 @@ QwenPaw bundle and the upstream source of truth.
 Standard library only, by design — matching sepia's own tooling
 (``scripts/check_versions.py``).
 
-    python3 qwenpaw-plugin/sync_skills.py           # sync, then verify
-    python3 qwenpaw-plugin/sync_skills.py --check   # verify only, no writes
-    python3 qwenpaw-plugin/sync_skills.py --upstream /path/to/sepia/skills
+    python3 .qwenpaw-plugin/sync_skills.py           # sync, then verify
+    python3 .qwenpaw-plugin/sync_skills.py --check   # verify only, no writes
+    python3 .qwenpaw-plugin/sync_skills.py --upstream /path/to/sepia/skills
 """
 from __future__ import annotations
 
@@ -61,7 +61,7 @@ def main() -> int:
         "--out",
         type=Path,
         default=PLUGIN_DIR / "skills",
-        help="plugin bundle skills/ directory (default: qwenpaw-plugin/skills)",
+        help="plugin bundle skills/ directory (default: .qwenpaw-plugin/skills)",
     )
     ap.add_argument(
         "--check",

@@ -24,14 +24,14 @@ the QwenPaw skill loader accepts it and ignores the unknown `license` key.
 From a checkout of this repo:
 
 ```bash
-cp -r qwenpaw-plugin ~/.qwenpaw/plugins/sepia
+cp -r .qwenpaw-plugin ~/.qwenpaw/plugins/sepia
 qwenpaw plugin reload   # or restart QwenPaw
 ```
 
 Or, if your QwenPaw build supports subdirectory installs from git:
 
 ```bash
-qwenpaw plugin install https://github.com/Nanako0129/sepia --subdir qwenpaw-plugin
+qwenpaw plugin install https://github.com/Nanako0129/sepia --subdir .qwenpaw-plugin
 ```
 
 After install, verify:
@@ -48,8 +48,8 @@ Upstream `skills/**` is the source of truth. After pulling upstream
 changes, re-sync and verify byte parity:
 
 ```bash
-python3 qwenpaw-plugin/sync_skills.py        # sync + verify; non-zero on drift
-python3 qwenpaw-plugin/sync_skills.py --check  # verify only
+python3 .qwenpaw-plugin/sync_skills.py        # sync + verify; non-zero on drift
+python3 .qwenpaw-plugin/sync_skills.py --check  # verify only
 ```
 
 CI (`.github/workflows/qwenpaw-sync.yml`) runs `--check` on every change
@@ -67,7 +67,7 @@ entries automatically (skills sourced from a plugin are tagged by
 
 ## Versioning
 
-`qwenpaw-plugin/plugin.json` carries `version: 0.10.0`, identical to the
+`.qwenpaw-plugin/plugin.json` carries `version: 1.0.0`, identical to the
 Claude/Codex manifests and the canonical SKILL.md, so
 `scripts/check_versions.py` (which discovers every `plugin.json` in the
 repo) stays green. `qwenpaw_version` is pinned to `2.1.0`–`2.99.0`.
