@@ -1,0 +1,20 @@
+{
+  "id": "sepia",
+  "name": "sepia",
+  "version": "1.0.0",
+  "type": "general",
+  "description": "De-AI writing package: the general Sepia router plus five operation skills (write, review, refactor, recreate, hemingway) and a /sepia slash command.",
+  "description_i18n": {
+    "zh-CN": "去 AI 味写作技能包：Sepia 总路由 + write/review/refactor/recreate/hemingway 五个操作技能，附 /sepia 斜杠命令。",
+    "en-US": "De-AI writing package: the general Sepia router plus five operation skills (write, review, refactor, recreate, hemingway) and a /sepia slash command."
+  },
+  "author": "Nanako Tsai",
+  "entry": {
+    "backend": "plugin.py"
+  },
+  "dependencies": [],
+  "qwenpaw_version": {
+    "min": "2.1.0",
+    "max": "2.99.0"
+  }
+}
