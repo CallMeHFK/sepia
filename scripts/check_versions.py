@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Fail when the files that declare a version disagree about which one it is.
 
-Three files carry sepia's version today: the Claude and Codex plugin manifests
-and the canonical SKILL.md's frontmatter. They have never disagreed. This is a
+Four files carry sepia's version today: the Claude, Codex and QwenPaw plugin
+manifests and the canonical SKILL.md's frontmatter. They have never disagreed. This is a
 guard for later, not a fix for now.
 
 It matters because the failure would be silent. Nothing breaks at install time
@@ -19,7 +19,7 @@ Two rules, covering the two ways this can rot:
    key that exists but is not a non-empty string fails: a field someone edited
    into a number or an empty value is a mistake, not an absence.
 
-2. A required core. The three files that declare the version today must keep
+2. A required core. The four files that declare the version today must keep
    declaring it. Without this, deleting one of them would just shrink the
    agreeing set and the check would stay green, which is precisely the silent
    failure it exists to catch.
@@ -58,6 +58,7 @@ MANIFEST_NAMES = {"plugin.json", "marketplace.json"}
 REQUIRED = (
     ".claude-plugin/plugin.json",
     ".codex-plugin/plugin.json",
+    ".qwenpaw-plugin/plugin.json",
     "skills/sepia/SKILL.md",
 )
 

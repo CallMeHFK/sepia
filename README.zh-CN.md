@@ -6,7 +6,7 @@
 
 > 从真正让 AI 露馅的那一层下手去 AI 味。小说在调整措辞之前先修复叙事架构。专业文档（发布说明、PR 回复、复盘报告、工单、技术文章）各自匹配符合场景的规则。
 
-这是一套 [Agent Skill](https://agentskills.io/specification)。只要支持这个标准的 agent 都能直接加载，[Skills CLI](https://skills.sh) 支持 77+ 款 agent 且单条命令即可安装。Claude Code、Codex、Grok Build 和 Antigravity 额外提供了原生插件包。全平台共用一份标准 `SKILL.md`，不对各个平台建立独立分支。四种操作分别为 **write**、**review**（仅诊断）、**refactor**（最小改动）与 **recreate**（整篇重写）。
+这是一套 [Agent Skill](https://agentskills.io/specification)。只要支持这个标准的 agent 都能直接加载，[Skills CLI](https://skills.sh) 支持 77+ 款 agent 且单条命令即可安装。Claude Code、Codex、Grok Build、Antigravity 和 QwenPaw 额外提供了原生插件包。全平台共用一份标准 `SKILL.md`，不对各个平台建立独立分支。四种操作分别为 **write**、**review**（仅诊断）、**refactor**（最小改动）与 **recreate**（整篇重写）。
 
 ## 为什么还需要另一个 humanizer
 
@@ -37,7 +37,7 @@ sepia 将这些实测差距，连同 [`research/`](research/) 里梳理的相关
 
 ## 操作入口
 
-完整的插件包为 Claude Code、Codex、Grok Build 和 Antigravity 带来了一个通用路由以及五个直达入口。
+完整的插件包为 Claude Code、Codex、Grok Build 和 Antigravity 带来了一个通用路由以及五个直达入口；QwenPaw 只有 `/sepia` 这一个路由，下表不适用。
 
 | 操作 | Claude Code | Codex | Grok Build | Antigravity | 用途 |
 |---|---|---|---|---|---|
@@ -47,7 +47,7 @@ sepia 将这些实测差距，连同 [`research/`](research/) 里梳理的相关
 | recreate | `/sepia-recreate` | `$sepia-recreate` | `/sepia-recreate` | `/sepia-recreate` | 根据原始事实与意图重新撰写 |
 | hemingway | `/sepia-hemingway` | `$sepia-hemingway` | `/sepia-hemingway` | `/sepia-hemingway` | 应用内置海明威语气写作或改写小说 |
 
-通用的 `/sepia`（Claude Code、Grok Build 与 Antigravity）或 `$sepia`（Codex）路由依旧可用。各操作 wrapper 都依赖同级的规范 skill，不支持单独安装，请直接安装完整的插件包。各平台验证了什么，写在「安装」一节。
+通用的 `/sepia`（Claude Code、Grok Build、Antigravity 与 QwenPaw）或 `$sepia`（Codex）路由依旧可用；QwenPaw 的插件包会把六个 skill 装进每个 workspace，不另设各操作的斜杠命令。各操作 wrapper 都依赖同级的规范 skill，不支持单独安装，请直接安装完整的插件包。各平台验证了什么，写在「安装」一节。
 
 ## 实验性功能：叠加语气／风格 skill
 
@@ -71,9 +71,9 @@ npx skills update sepia -g             # update
 npx skills remove sepia -g             # uninstall
 ```
 
-只要是 [Skills CLI](https://skills.sh) 支持的 agent 都可以安装（Cursor、Cline、Windsurf、Copilot、OpenCode、goose 等）。安装过程中按提示选择你使用的 agent 即可。对于下方四款平台以外的运行时表现，我们尚未做过实机测试。本 skill 基于 Agent Skills 标准，属于纯 markdown 文件，如果你的 agent 跑起来遇到问题，欢迎提交 issue。
+只要是 [Skills CLI](https://skills.sh) 支持的 agent 都可以安装（Cursor、Cline、Windsurf、Copilot、OpenCode、goose 等）。安装过程中按提示选择你使用的 agent 即可。对于下方五款平台以外的运行时表现，我们尚未做过实机测试。本 skill 基于 Agent Skills 标准，属于纯 markdown 文件，如果你的 agent 跑起来遇到问题，欢迎提交 issue。
 
-下方四款平台都提供原生插件安装方式，每款都跑过实机安装。所谓验证，指安装流程能够顺利走完并出现 sepia 相关的入口命令。装好之后入口的行为没有逐平台实测。
+下方五款平台都提供原生插件安装方式，每款都跑过实机安装（QwenPaw 由贡献者安装，见该节）。所谓验证，指安装流程能够顺利走完并出现 sepia 相关的入口命令。装好之后入口的行为没有逐平台实测。
 
 ### Claude Code
 
@@ -120,6 +120,20 @@ grok plugin update
 agy plugin install https://github.com/Nanako0129/sepia
 ```
 
+### QwenPaw
+
+```bash
+# install：qwenpaw 只接受本地目录（或 zip URL），先 clone；
+# 插件包里的 skills 符号链接在 clone 内即可解析
+git clone https://github.com/Nanako0129/sepia
+qwenpaw plugin install ./sepia/.qwenpaw-plugin
+
+# uninstall
+qwenpaw plugin uninstall sepia
+```
+
+由贡献者在 QwenPaw 2.2.1 上实机验证（#250，维护者未自行复现）：安装能走完、`/sepia` 有路由，插件包里的 `skills` 符号链接会被 `shutil.copytree` 展开成真实目录。
+
 ### Project scope（替代方案）
 
 如果某个仓库需要锁定自己的独立副本，可将 `skills/sepia/` 提交到该仓库，路径设为 `.agents/skills/sepia`（Codex + Antigravity）或 `.claude/skills/sepia`（Claude Code）。
@@ -140,6 +154,9 @@ grok plugin uninstall sepia
 
 # Antigravity
 agy plugin uninstall sepia
+
+# QwenPaw
+qwenpaw plugin uninstall sepia
 ```
 
 ## 目录结构
@@ -158,6 +175,7 @@ sepia/
 │   └── sepia-hemingway/SKILL.md  # fiction write/refactor with the built-in voice
 ├── .claude-plugin/          # Claude Code packaging (plugin.json, marketplace.json)
 ├── .codex-plugin/           # Codex packaging
+├── .qwenpaw-plugin/         # QwenPaw packaging (plugin.json, plugin.py, skills symlink)
 ├── .agents/                 # Codex/Antigravity workspace-mode discovery + Antigravity workflow
 └── research/                # digested evidence base with sources
 ```

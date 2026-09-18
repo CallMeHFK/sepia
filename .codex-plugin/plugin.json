@@ -1,6 +1,6 @@
 {
   "name": "sepia",
-  "version": "1.0.0",
+  "version": "0.10.0",
   "description": "De-AI writing package with the general Sepia router plus five separate operation entries: write, review, refactor, recreate, and hemingway.",
   "skills": "./skills/",
   "license": "MIT",

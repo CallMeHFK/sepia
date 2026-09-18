@@ -26,6 +26,7 @@ def skill_md(frontmatter_lines):
 BASELINE = {
     ".claude-plugin/plugin.json": {"name": "sepia", "version": "0.4.0"},
     ".codex-plugin/plugin.json": {"name": "sepia", "version": "0.4.0"},
+    ".qwenpaw-plugin/plugin.json": {"name": "sepia", "version": "0.4.0"},
     ".claude-plugin/marketplace.json": {"name": "sepia", "plugins": [{"name": "sepia"}]},
     "plugin.json": {"name": "sepia"},
     "skills/sepia/SKILL.md": skill_md(
@@ -59,7 +60,7 @@ class CheckVersionsCase(unittest.TestCase):
     def test_agreeing_declarations_pass(self):
         code, report = self.run_check()
         self.assertEqual(code, 0)
-        self.assertIn("3 declarations, all 0.4.0", report)
+        self.assertIn("4 declarations, all 0.4.0", report)
 
     def test_undeclared_files_are_listed_not_failed(self):
         code, report = self.run_check()
@@ -89,6 +90,18 @@ class CheckVersionsCase(unittest.TestCase):
         self.assertEqual(code, 1)
         self.assertIn("required to declare a version", report)
         self.assertIn(".codex-plugin/plugin.json", report)
+
+    def test_removing_the_qwenpaw_manifest_fails(self):
+        # Review case: .qwenpaw-plugin/plugin.json is part of the required set,
+        # so deleting it must go red rather than shrinking the agreeing set to
+        # "3 declarations, all 0.4.0" and letting the package vanish silently.
+        files = dict(BASELINE)
+        del files[".qwenpaw-plugin/plugin.json"]
+        self.write(files)
+        code, report = check_versions.run(self.root)
+        self.assertEqual(code, 1)
+        self.assertIn("required", report)
+        self.assertIn(".qwenpaw-plugin/plugin.json", report)
 
     def test_a_non_string_version_fails_rather_than_counting_as_absent(self):
         # Review case: "version": 0.5. Present-but-wrong is an error.
@@ -350,7 +363,7 @@ class CheckVersionsCase(unittest.TestCase):
         content = "\ufeff" + skill_md(["name: sepia", "metadata:", '  version: "0.4.0"'])
         code, report = self.run_check({"skills/sepia/SKILL.md": content})
         self.assertEqual(code, 0)
-        self.assertIn("3 declarations, all 0.4.0", report)
+        self.assertIn("4 declarations, all 0.4.0", report)
 
     def test_a_corrupted_opening_delimiter_means_no_frontmatter(self):
         # Review round 7: ---oops is not a frontmatter opener, but prefix
@@ -379,7 +392,7 @@ class CheckVersionsCase(unittest.TestCase):
             }
         )
         self.assertEqual(code, 0)
-        self.assertIn("3 declarations, all 0.4.0", report)
+        self.assertIn("4 declarations, all 0.4.0", report)
 
     # --- review round four: whitespace, comments, unquoted scalars ----------
 
@@ -401,7 +414,7 @@ class CheckVersionsCase(unittest.TestCase):
             }
         )
         self.assertEqual(code, 0)
-        self.assertIn("3 declarations, all 0.4.0", report)
+        self.assertIn("4 declarations, all 0.4.0", report)
 
     def test_an_indented_comment_does_not_fix_the_child_indentation(self):
         # If the comment were treated as the first child, its indentation
@@ -467,7 +480,7 @@ class CheckVersionsCase(unittest.TestCase):
             path.write_text(content, encoding="utf-8")
         code, report = check_versions.run(nested)
         self.assertEqual(code, 0)
-        self.assertIn("3 declarations, all 0.4.0", report)
+        self.assertIn("4 declarations, all 0.4.0", report)
 
     # --- inline metadata is refused, not parsed (round 6) -------------------
 
@@ -508,7 +521,7 @@ class CheckVersionsCase(unittest.TestCase):
             {"plugin.json": {"name": "sepia", "version": "0.4.0"}}
         )
         self.assertEqual(code, 0)
-        self.assertIn("4 declarations", report)
+        self.assertIn("5 declarations", report)
 
     def test_root_plugin_json_growing_a_different_version_fails(self):
         code, report = self.run_check(
