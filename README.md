@@ -8,6 +8,22 @@
 
 A portable [Agent Skill](https://agentskills.io/specification): any agent that speaks the standard can load it, and the [Skills CLI](https://skills.sh), which supports 77+ agents, installs it with one command. Claude Code, Codex, Grok Build, Antigravity, and QwenPaw additionally get native plugin packaging. One canonical `SKILL.md`, no per-platform forks. Four operations: **write**, **review** (diagnose only), **refactor** (minimal edits), **recreate** (full rewrite).
 
+## Table of Contents
+
+- [Why another humanizer](#why-another-humanizer)
+- [Operation entries](#operation-entries)
+- [Experimental: composing with voice skills](#experimental-composing-with-voice-skills)
+- [Sentence rhythm and Chinese calibration](#sentence-rhythm-and-chinese-calibration)
+- [Install](#install)
+- [Uninstall](#uninstall)
+- [Layout](#layout)
+- [Star History](#star-history)
+- [Sources](#sources)
+- [Support](#support)
+- [License](#license)
+
+---
+
 ## Why another humanizer
 
 Every popular humanizer edits word choice and syntax. [StoryScope](https://arxiv.org/abs/2604.03136) (Russell et al., 2026: 61,608 stories, human + 5 frontier LLMs) showed that a classifier using **narrative-structure features alone** detects AI fiction at 93.2% macro-F1. In the same study's LAMP-edited condition, where human editors had rewritten the surface style, detection dropped only from 95.5% to 93.9%. The tells that survive are architectural: themes explained by the narrator, single-track causally-tidy plots, emotions rendered only as bodily sensation, no real-world references, no reader, linear time, endings resolved by protagonist growth and acceptance.
@@ -20,9 +36,19 @@ sepia turns those measured gaps, together with the related studies digested in [
 | 2 | Discourse flow | de-template the paragraph-question sequence, fix the mid-story sag, vary rhythm and positions |
 | 3 | Surface style | the classic layer: clichés, syntax templates, vocabulary, register |
 
-Plus a 30-feature diagnosis rubric and per-model fingerprints in two layers: narrative tells measured by StoryScope (Claude, GPT, Gemini, DeepSeek, Kimi) and sentence-level tells taken from the vendors' own prompting guides (Claude Fable 5.1 and Mythos 5.1, Fable 5 and Mythos 5, Opus 5, Opus 4.8; GPT-5.6, GPT-6 Astra; Gemini 3 series), applied when the writing or executing model is known. Vendors that publish no such guidance are recorded as consulted, not guessed.
+A 30-feature diagnosis rubric and per-model fingerprints across two layers apply when the writing or executing model is known:
 
-Professional prose fails differently. The studies digested in [`research/`](research/) point at filler that carries no information, hedging where a judgment was needed, chatbot leftovers, register that ignores the venue, and formatting that looks stamped out. Each document type gets a thin rule file on top of one shared checklist:
+| Model family | Narrative layer (StoryScope) | Sentence-level prose layer (Vendor prompting guides) |
+|---|---|---|
+| Claude | Measured | Claude Fable 5.1 and Mythos 5.1, Fable 5 and Mythos 5, Opus 5, Opus 4.8 |
+| GPT | Measured | GPT-5.6, GPT-6 Astra |
+| Gemini | Measured | Gemini 3 series |
+| DeepSeek | Measured | Consulted (no guidance published) |
+| Kimi | Measured | Consulted (no guidance published) |
+
+> **Notice:** Vendors that publish no prompt guidance are recorded as consulted, not guessed.
+
+Professional prose fails differently, and the structure-level finding holds there too: a 2026 replication of StoryScope on 2,250 company blog posts against 11,250 AI mirrors separated them at 98.0 macro-F1 from structural features alone, with the AI shape described as tidy and self-announcing (`SLOPSHAPE-2026` in the ledger, arXiv:2609.15369; a preprint whose features are LLM-scored; it tested detection of original and model-self-reworded posts, never human editing). The studies digested in [`research/`](research/) point at filler that carries no information, hedging where a judgment was needed, chatbot leftovers, register that ignores the venue, and formatting that looks stamped out. Each document type gets a thin rule file on top of one shared checklist:
 
 | Domain | The gist |
 |---|---|
@@ -33,7 +59,7 @@ Professional prose fails differently. The studies digested in [`research/`](rese
 | Technical articles | open at the problem, one real dead end, one committed opinion, numbers with conditions |
 | Long-form journalism (features, investigations, data stories) | lead and body in two registers, quotations keep their spoken texture, every number carries a comparison, no summary ending |
 
-The governing principle throughout: **calibrate to the human distribution, don't invert the AI one.** Humans sit at moderate values; a story with every rule applied is a new fingerprint. The skill selects 3–5 moves per story and leaves slack.
+> **Governing principle:** Calibrate to the human distribution, don't invert the AI one. Humans sit at moderate values; a story with every rule applied is a new fingerprint. The skill selects 3–5 moves per story and leaves slack.
 
 ## Operation entries
 
@@ -47,21 +73,89 @@ The complete plugin package gives Claude Code, Codex, Grok Build, and Antigravit
 | recreate | `/sepia-recreate` | `$sepia-recreate` | `/sepia-recreate` | `/sepia-recreate` | Rewrite from the source facts and intent |
 | hemingway | `/sepia-hemingway` | `$sepia-hemingway` | `/sepia-hemingway` | `/sepia-hemingway` | Write or refactor fiction with the built-in Hemingway voice applied |
 
-The general `/sepia` (Claude Code, Grok Build, Antigravity, and QwenPaw) or `$sepia` (Codex) router remains available; on QwenPaw the package installs the six skills into each workspace and registers no per-operation slash commands. The operation wrappers depend on their sibling canonical skill, so standalone wrapper installation is unsupported; install the complete plugin package. What was verified on each platform is stated under Install.
+The general `/sepia` (Claude Code, Grok Build, Antigravity, and QwenPaw) or `$sepia` (Codex) router remains available; on QwenPaw the package installs the six skills into each workspace and registers no per-operation slash commands. What was verified on each platform is stated under [Install](#install).
+
+> **Notice:** Standalone wrapper installation is unsupported. The operation wrappers depend on their sibling canonical skill; install the complete plugin package.
 
 ## Experimental: composing with voice skills
 
 Since v0.4.0, sepia defines an interface for stacking a voice or style skill on top of it — a minimalism method, a brand voice, a persona guide. It is opt-in: tell sepia the voice skill is in play, and it loads `references/voice-skills.md` over the normal route. No external voice is loaded unless you say so.
 
-The contract in short: sepia's architecture decisions come first. The voice's moves are applied selectively (3–5 signature moves per piece, formula endings deliberately broken sometimes). Review reports the voice's known costs instead of fixing them away, while uniformity findings keep full strength: a voice does not excuse a metronome. On professional routes the venue still sets the register. Direct conflicts come back to you. The interface is grounded in one blind review experiment on a strict-minimalism specimen — a worked example, not measured evidence. One built-in profile ships under `references/voices/` (Hemingway: iceberg omission for fiction, the Kansas City Star rules for professional prose, each move traced to its source). The built-in profile follows the same rule. On fiction, a review only reports when your text's recorded findings fit the Hemingway profile; it loads nothing. Asking for strong de-AI on a story counts as opting in, and sepia then says which profile it is applying and how to decline. `/sepia-hemingway` is the direct entry.
+The interface contract operates under fixed precedence rules across operations and routes:
+
+| Rule dimension | Contract specification |
+|---|---|
+| Architecture | sepia's architecture decisions come first. |
+| Move selection | Voice moves are applied selectively (3–5 signature moves per piece, fewer when a sparse shape or the facts offer fewer; formula endings deliberately broken sometimes). |
+| Review diagnostics | Review reports the voice's known costs instead of fixing them away. |
+| Uniformity enforcement | Uniformity findings keep full strength: a voice does not excuse a metronome. |
+| Professional register | On professional routes, the venue still sets the register. |
+| Conflict resolution | Direct conflicts come back to you. |
+
+> **Notice:** The voice-skills interface is grounded in one blind review experiment on a strict-minimalism specimen — a worked example, not measured evidence.
+
+Two built-in profiles ship under `references/voices/`, alongside a persona profile kind with declared override rights:
+
+| Profile | Target routes | Source & characteristics | Opt-in & invocation |
+|---|---|---|---|
+| Hemingway (`references/voices/hemingway.md`) | Fiction and professional prose | Iceberg omission for fiction, the Kansas City Star rules for professional prose; each move traced to its source | Direct entry `/sepia-hemingway` (or `$sepia-hemingway`). On fiction, asking for strong de-AI on a story counts as opting in (sepia announces the profile and how to decline). Without an opt-in, a fiction review only reports when the text fits the profile and loads nothing. |
+| Taiwan long-form journalism (`references/voices/tw-journalism.md`) | Professional routes only | Nine narrative shapes with their moves, drawn from private human-side journalism measurement and its close reading | Opt-in phrase: `"apply the Taiwan journalism voice"`. Follows the same rules as Hemingway. |
+| Persona template (`references/voices/PERSONA-TEMPLATE.md`) | Author-defined | One writer's style with declared override rights; checked by `scripts/check_persona.py` | Author-created profile. Template at `references/voices/PERSONA-TEMPLATE.md`. |
+| Nyaneko (`references/voices/personas/nyaneko.md`) | Professional routes only | Built-in companion voice written from the maintainer's voice specification with her own exemplars | Opt-in phrase: `"apply persona Nyaneko"` or `「套用 persona Nyaneko」`. |
+
+### Writing with a persona: a short how-to
+
+sepia's rules remove tells. Warmth has another source: the writer knowing who is speaking, and to whom. One case from this project's own release, with nothing measured: the v0.12.0 Threads post was drafted twice by the same model from the same release notes. The first prompt handed it a skeleton (version line, bullets, fixes, engineering note, update line) and got a form filled in. The second prompt handed it an identity, "I maintain this project and just shipped v0.12.0; talk to my followers in my own voice; how you organise it is yours", plus the notes as the only fact source and the platform's limits, and got the post the maintainer kept. A sepia review of that post then found its tells clustered at the opening and the close (an opening about how the change came to be, a maxim ending, a few absolutes), and a refactor took them out without touching the middle.
+
+The order that worked:
+
+1. Identity first.
+2. Facts separately, as the only source.
+3. Constraints stated as platform limits, with the structure left to the model.
+4. sepia as the check.
+
+```text
+Do not use tools; everything you need is below.
+I am <who>, writing for <whom>, about <what just happened>. Use my own voice; how to organise it is yours.
+Platform limits: <length, markup, mentions>.
+Facts come only from the notes below; numbers and identifiers must match them.
+===== notes =====
+<the source document>
+```
+
+A persona profile is that identity written down once so every piece starts from it: what they are to the reader, what their first sentence does, how warmth attaches to a fact, what they never do, and pieces in their own voice as exemplars. The template is `references/voices/PERSONA-TEMPLATE.md`, the built-in `references/voices/personas/nyaneko.md` is a worked example, and the interface validator checks the profile structure:
+
+```bash
+python3 scripts/check_persona.py <file>
+```
+
+Write your own; the exemplars carry more than the description does.
 
 ## Sentence rhythm and Chinese calibration
 
-The style pass checks the *spread* of sentence lengths, the one syntactic measure on which every study that measured it agrees (human text varies more within a passage, in English and in Chinese); mean sentence length, punctuation counts, and paragraph length are not treated as signals because the measured directions contradict each other. Chinese text loads `references/languages/zh.md`, a calibration built on the one human-vs-machine Chinese corpus (HC3, 2023) plus a private human-side measurement of Traditional Chinese journalism (about two thousand articles from one unnamed Taiwanese publication over about ten years; corpus not distributed), with the limits of both stated in the file; evidence and numbers are in `research/rhythm-syntax.md`, and the journalism digest is `research/zh-news-corpus.md`.
+The style pass checks the *spread* of sentence lengths, the one syntactic measure on which every study that measured it agrees: human text varies more within a passage, in English and in Chinese.
+
+| Syntactic measure | Status | Empirical basis |
+|---|---|---|
+| Sentence length spread | Checked signal | Within-passage variance is consistently higher in human text across English and Chinese studies. Evidence and numbers are in [`research/rhythm-syntax.md`](research/rhythm-syntax.md). |
+| Mean sentence length | Discarded | Measured directions contradict each other across corpora. |
+| Punctuation counts | Discarded | Measured directions contradict each other across corpora. |
+| Paragraph length | Discarded | Measured directions contradict each other across corpora. |
+
+Chinese text loads `references/languages/zh.md`, calibrating the style pass across four distinct evidence layers:
+
+| Layer / Source | Nature of evidence | Corpus & calibration details |
+|---|---|---|
+| HC3 (2023) | Measured corpus | Human-vs-machine Chinese corpus baseline. |
+| Traditional Chinese journalism | Human-side empirical measurement | About two thousand articles from one unnamed Taiwanese publication spanning about ten years (corpus not distributed; digest in [`research/zh-news-corpus.md`](research/zh-news-corpus.md)). |
+| Contrast group | Machine-side empirical contrast | 119 synthetic pieces across three models using one shared base prompt with a one-line variant for one model. |
+| Taiwan conventions | Normative standard | Short normative section of Taiwan writing conventions drawn from public standards and first-tier consensus. |
+
+> **Notice:** The limits of all three empirical Chinese sources are stated in `references/languages/zh.md`.
 
 ## Install
 
-Every command below is written for **user scope** — install once, use it in every project.
+> **Notice:** Every command below is written for **user scope** — install once, use it in every project.
 
 ### Any agent (Skills CLI, 77+ agents)
 
@@ -73,7 +167,7 @@ npx skills remove sepia -g             # uninstall
 
 Installs on every agent the [Skills CLI](https://skills.sh) supports — Cursor, Cline, Windsurf, Copilot, OpenCode, goose, and more. Pick your agents when prompted. Runtime behavior outside the five platforms below has not been exercised by us; the skill is plain markdown under the Agent Skills standard, so file an issue if your agent trips on it.
 
-The five platforms below have native plugin installers, each exercised with a live install (QwenPaw's by its contributor, see that section). Verified means the install completes and the sepia entries appear. Whether the entries then behave as documented has not been checked platform by platform.
+> **Notice:** "Verified" means the install completes and the sepia entries appear. The five native plugin installers were each exercised with a live install (QwenPaw's by its contributor). Whether the entries then behave as documented has not been checked platform by platform.
 
 ### Claude Code
 
@@ -87,7 +181,7 @@ claude plugin marketplace update sepia
 claude plugin update sepia
 ```
 
-The in-session `/plugin install` dialog asks you to pick a scope — choose **User** there.
+> **Tip:** The in-session `/plugin install` dialog asks you to pick a scope — choose **User** there.
 
 ### Codex
 
@@ -132,7 +226,7 @@ qwenpaw plugin install ./sepia/.qwenpaw-plugin
 qwenpaw plugin uninstall sepia
 ```
 
-Contributor-verified on QwenPaw 2.2.1 (#250, not reproduced by the maintainer): the install completes and `/sepia` is routed, with the packaged `skills` symlink followed into a real tree by `shutil.copytree`.
+> **Notice:** Contributor-verified on QwenPaw 2.2.1 (#250, not reproduced by the maintainer): the install completes and `/sepia` is routed, with the packaged `skills` symlink followed into a real tree by `shutil.copytree`.
 
 ### Project scope (alternative)
 
@@ -190,9 +284,29 @@ sepia/
   </picture>
 </a>
 
+Star history growth over time for Nanako0129/sepia.
+
 ## Sources
 
-Full digests with links in [`research/`](research/). Primary: StoryScope ([arXiv:2604.03136](https://arxiv.org/abs/2604.03136)); LAMP ([CHI 2025](https://arxiv.org/abs/2409.14509)); Measuring AI Slop ([arXiv:2509.19163](https://arxiv.org/abs/2509.19163)); Reinhart et al. ([PNAS 2025](https://arxiv.org/abs/2410.16107)); Russell et al. ([ACL 2025](https://arxiv.org/abs/2501.15654)); NarraBench ([arXiv:2510.09869](https://arxiv.org/abs/2510.09869)); Echoes in AI ([PNAS 2025](https://arxiv.org/abs/2501.00273)); QUDsim ([COLM 2025](https://arxiv.org/abs/2504.09373)); Beguš ([2024](https://arxiv.org/abs/2310.12902)); Beyond Checkmate ([EMNLP 2025](https://arxiv.org/abs/2501.19301)); Nonaka & Perry ([2025](https://arxiv.org/abs/2510.18932)); Chakrabarty et al. ([2026](https://arxiv.org/abs/2510.13939)); Shan, Lee & Hao ([2026](https://arxiv.org/abs/2608.27855)); Rohrbacher et al. ([2026](https://arxiv.org/abs/2609.02482)); Sourati et al. ([2026](https://arxiv.org/abs/2502.11266)).
+Full digests with links are in [`research/`](research/). Primary studies include:
+
+| Source | Venue / Identifier |
+|---|---|
+| StoryScope | [arXiv:2604.03136](https://arxiv.org/abs/2604.03136) |
+| LAMP | [CHI 2025](https://arxiv.org/abs/2409.14509) |
+| Measuring AI Slop | [arXiv:2509.19163](https://arxiv.org/abs/2509.19163) |
+| Reinhart et al. | [PNAS 2025](https://arxiv.org/abs/2410.16107) |
+| Russell et al. | [ACL 2025](https://arxiv.org/abs/2501.15654) |
+| NarraBench | [arXiv:2510.09869](https://arxiv.org/abs/2510.09869) |
+| Echoes in AI | [PNAS 2025](https://arxiv.org/abs/2501.00273) |
+| QUDsim | [COLM 2025](https://arxiv.org/abs/2504.09373) |
+| Beguš | [2024](https://arxiv.org/abs/2310.12902) |
+| Beyond Checkmate | [EMNLP 2025](https://arxiv.org/abs/2501.19301) |
+| Nonaka & Perry | [2025](https://arxiv.org/abs/2510.18932) |
+| Chakrabarty et al. | [2026](https://arxiv.org/abs/2510.13939) |
+| Shan, Lee & Hao | [2026](https://arxiv.org/abs/2608.27855) |
+| Rohrbacher et al. | [2026](https://arxiv.org/abs/2609.02482) |
+| Sourati et al. | [2026](https://arxiv.org/abs/2502.11266) |
 
 ## Support
 

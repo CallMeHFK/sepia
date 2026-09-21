@@ -57,9 +57,18 @@ jobs:
         # --model pinned so a model rollout does not read as a plugin
         # regression; judge stays the default (haiku). Threshold 0.7 tolerates
         # one noisy judge vote without letting a broken skill pass.
+        #
+        # --trust-plugin answers the CLI's first-run trust prompt, which a
+        # runner cannot answer interactively: since 2026-09-15 every run
+        # exited 1 before the first case with "is not a trusted plugin
+        # directory". The flag asserts trust in this plugin's own code and
+        # eval suite — here the repository the workflow just checked out,
+        # whose code this job already runs under the maintainer's
+        # credential. It implies nothing else: not --scaffold, not
+        # --allow-tools, and it does not turn mocks off.
         run: |
           claude plugin eval . --json results.json --threshold 0.7 \
-            --model claude-sonnet-5 --no-publish
+            --model claude-sonnet-5 --no-publish --trust-plugin
       - name: summarize
         if: always()
         run: |
