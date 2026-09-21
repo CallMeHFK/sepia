@@ -63,17 +63,17 @@ Professional prose fails differently, and the structure-level finding holds ther
 
 ## Operation entries
 
-The complete plugin package gives Claude Code, Codex, Grok Build, and Antigravity a general router plus five direct entries. QwenPaw gets the `/sepia` router only, so the table below does not apply there:
+The complete plugin package gives Claude Code, Codex, Grok Build, Antigravity, and QwenPaw a general router plus five direct entries:
 
-| Operation | Claude Code | Codex | Grok Build | Antigravity | Meaning |
-|---|---|---|---|---|---|
-| write | `/sepia-write` | `$sepia-write` | `/sepia-write` | `/sepia-write` | Create new prose |
-| review | `/sepia-review` | `$sepia-review` | `/sepia-review` | `/sepia-review` | Diagnose without editing |
-| refactor | `/sepia-refactor` | `$sepia-refactor` | `/sepia-refactor` | `/sepia-refactor` | Make minimal in-place edits |
-| recreate | `/sepia-recreate` | `$sepia-recreate` | `/sepia-recreate` | `/sepia-recreate` | Rewrite from the source facts and intent |
-| hemingway | `/sepia-hemingway` | `$sepia-hemingway` | `/sepia-hemingway` | `/sepia-hemingway` | Write or refactor fiction with the built-in Hemingway voice applied |
+| Operation | Claude Code | Codex | Grok Build | Antigravity | QwenPaw | Meaning |
+|---|---|---|---|---|---|---|
+| write | `/sepia-write` | `$sepia-write` | `/sepia-write` | `/sepia-write` | `/sepia-write` | Create new prose |
+| review | `/sepia-review` | `$sepia-review` | `/sepia-review` | `/sepia-review` | `/sepia-review` | Diagnose without editing |
+| refactor | `/sepia-refactor` | `$sepia-refactor` | `/sepia-refactor` | `/sepia-refactor` | `/sepia-refactor` | Make minimal in-place edits |
+| recreate | `/sepia-recreate` | `$sepia-recreate` | `/sepia-recreate` | `/sepia-recreate` | `/sepia-recreate` | Rewrite from the source facts and intent |
+| hemingway | `/sepia-hemingway` | `$sepia-hemingway` | `/sepia-hemingway` | `/sepia-hemingway` | `/sepia-hemingway` | Write or refactor fiction with the built-in Hemingway voice applied |
 
-The general `/sepia` (Claude Code, Grok Build, Antigravity, and QwenPaw) or `$sepia` (Codex) router remains available; on QwenPaw the package installs the six skills into each workspace and registers no per-operation slash commands. What was verified on each platform is stated under [Install](#install).
+The general `/sepia` (Claude Code, Grok Build, Antigravity, and QwenPaw) or `$sepia` (Codex) router remains available. On QwenPaw the package installs the six skills into each workspace: the five operation entries are answered by the host's own `/<skill-name>` dispatch, and `/sepia` by the command the package registers, which takes the whole text as one argument plus `--op` and `--lang` flags. What was verified on each platform is stated under [Install](#install).
 
 > **Notice:** Standalone wrapper installation is unsupported. The operation wrappers depend on their sibling canonical skill; install the complete plugin package.
 

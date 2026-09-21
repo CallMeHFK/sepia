@@ -63,17 +63,17 @@ sepia 将这些实测差距，连同 [`research/`](research/) 里梳理的相关
 
 ## 操作入口
 
-完整的插件包为 Claude Code、Codex、Grok Build 和 Antigravity 带来了一个通用路由以及五个直达入口；QwenPaw 只有 `/sepia` 这一个路由，下表不适用：
+完整的插件包为 Claude Code、Codex、Grok Build、Antigravity 和 QwenPaw 带来了一个通用路由以及五个直达入口：
 
-| 操作 | Claude Code | Codex | Grok Build | Antigravity | 用途 |
-|---|---|---|---|---|---|
-| write | `/sepia-write` | `$sepia-write` | `/sepia-write` | `/sepia-write` | 撰写新内容 |
-| review | `/sepia-review` | `$sepia-review` | `/sepia-review` | `/sepia-review` | 只诊断，不修改 |
-| refactor | `/sepia-refactor` | `$sepia-refactor` | `/sepia-refactor` | `/sepia-refactor` | 在原文上做最小修改 |
-| recreate | `/sepia-recreate` | `$sepia-recreate` | `/sepia-recreate` | `/sepia-recreate` | 根据原始事实与意图重新撰写 |
-| hemingway | `/sepia-hemingway` | `$sepia-hemingway` | `/sepia-hemingway` | `/sepia-hemingway` | 应用内置海明威语气写作或改写小说 |
+| 操作 | Claude Code | Codex | Grok Build | Antigravity | QwenPaw | 用途 |
+|---|---|---|---|---|---|---|
+| write | `/sepia-write` | `$sepia-write` | `/sepia-write` | `/sepia-write` | `/sepia-write` | 撰写新内容 |
+| review | `/sepia-review` | `$sepia-review` | `/sepia-review` | `/sepia-review` | `/sepia-review` | 只诊断，不修改 |
+| refactor | `/sepia-refactor` | `$sepia-refactor` | `/sepia-refactor` | `/sepia-refactor` | `/sepia-refactor` | 在原文上做最小修改 |
+| recreate | `/sepia-recreate` | `$sepia-recreate` | `/sepia-recreate` | `/sepia-recreate` | `/sepia-recreate` | 根据原始事实与意图重新撰写 |
+| hemingway | `/sepia-hemingway` | `$sepia-hemingway` | `/sepia-hemingway` | `/sepia-hemingway` | `/sepia-hemingway` | 应用内置海明威语气写作或改写小说 |
 
-通用的 `/sepia`（Claude Code、Grok Build、Antigravity 与 QwenPaw）或 `$sepia`（Codex）路由依旧可用；QwenPaw 的插件包会把六个 skill 装进每个 workspace，不另设各操作的斜杠命令。各平台具体验证了哪些内容，参见[安装](#安装)一节。
+通用的 `/sepia`（Claude Code、Grok Build、Antigravity 与 QwenPaw）或 `$sepia`（Codex）路由依旧可用。QwenPaw 的插件包会把六个 skill 装进每个 workspace：表中五个操作入口由 host 原生的 `/<skill-name>` 分发响应，`/sepia` 则由插件注册的那条命令接管，整段文本作为单个参数传入，并支持 `--op`、`--lang` 两个选项。各平台具体验证了哪些内容，参见[安装](#安装)一节。
 
 > **注意：** 各操作 wrapper 均依赖同级的规范 skill，不支持单独安装，请直接安装完整的插件包。
 
