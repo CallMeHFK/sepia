@@ -29,12 +29,23 @@ PACKAGED_SKILLS = ("sepia",) + tuple(f"sepia-{op}" for op in OPERATIONS)
 
 
 def _missing_packaged_skills() -> list[str]:
-    """Names in PACKAGED_SKILLS whose ``SKILL.md`` cannot be read."""
-    return [
-        name
-        for name in PACKAGED_SKILLS
-        if not (SKILLS_DIR / name / "SKILL.md").is_file()
-    ]
+    """Names in PACKAGED_SKILLS whose ``SKILL.md`` cannot be read.
+
+    Opened rather than stat'ed: the host reads these files after installing
+    them, and a path that exists but cannot be opened would otherwise pass a
+    ``is_file()`` check and land a provider whose skills fail further down.
+    """
+    missing = []
+    for name in PACKAGED_SKILLS:
+        try:
+            with open(SKILLS_DIR / name / "SKILL.md", "rb"):
+                pass
+        except OSError:
+            # FileNotFoundError (absent, or the flattened link that left the
+            # tree unresolvable), NotADirectoryError, IsADirectoryError and
+            # PermissionError all mean the same thing for this guard.
+            missing.append(name)
+    return missing
 
 
 class SepiaPlugin:
@@ -49,9 +60,10 @@ class SepiaPlugin:
             # report success, so nothing is registered here: the "/<skill>"
             # dispatch the host provides natively keeps the names it has.
             logger.error(
-                "✗ sepia: packaged skills are unreadable under %s (missing: "
-                "%s). Install from a git clone of the repository, not from a "
-                "zip or a checkout without symlink support.",
+                "✗ sepia: packaged skills cannot be read under %s (missing: "
+                "%s). Check their permissions; a zip install or a checkout "
+                "without symlink support also lands here, and that one needs a "
+                "git clone instead.",
                 SKILLS_DIR,
                 ", ".join(missing),
             )

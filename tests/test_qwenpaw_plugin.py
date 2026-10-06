@@ -17,6 +17,7 @@ picture.  python3 -m unittest discover -s tests
 """
 import importlib.util
 import logging
+import os
 import tempfile
 import unittest
 from pathlib import Path
@@ -114,6 +115,26 @@ class RegisterCase(unittest.TestCase):
         # message contains "sepia" for every skill, so a looser assertion would
         # pass even when the list came out empty or wrong.
         self.assertIn("(missing: sepia-hemingway)", "\n".join(logs.output))
+
+    @unittest.skipUnless(
+        hasattr(os, "geteuid") and os.geteuid() != 0,
+        "chmod 000 does not stop root from reading the file",
+    )
+    def test_unreadable_skill_registers_nothing(self):
+        # The guard opens the files rather than stat'ing them: a SKILL.md that
+        # exists but cannot be read would otherwise land a provider whose skill
+        # fails only when the host gets around to reading it.
+        skills_dir = build_package(self.root, list(plugin.PACKAGED_SKILLS))
+        victim = skills_dir / "sepia-review" / "SKILL.md"
+        victim.chmod(0o000)
+        self.addCleanup(victim.chmod, 0o644)
+        api = RecordingApi()
+        with self.assertLogs(plugin.logger, level=logging.ERROR) as logs:
+            with mock.patch.object(plugin, "SKILLS_DIR", skills_dir):
+                plugin.SepiaPlugin().register(api)
+        self.assertEqual(api.providers, [])
+        self.assertEqual(api.commands, [])
+        self.assertIn("(missing: sepia-review)", "\n".join(logs.output))
 
 
 class RepositoryPackageCase(unittest.TestCase):
