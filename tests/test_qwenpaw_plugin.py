@@ -1,12 +1,15 @@
 """Unit tests for .qwenpaw-plugin/plugin.py.
 
-Two decisions in that file carry risk, so they are covered here instead of
-in a live QwenPaw. The slash-command parser decides what counts as command
-control data and what stays untrusted target text, and ``register()`` decides
-whether the packaged skills are worth installing at all: the host installs a
+The risk carried here is ``register()``'s payload guard: the host installs a
 plugin with ``shutil.copytree``, which only follows the package's ``skills``
 symlink when the checkout kept it a link, and the host reports a successful
-install even when it lands zero skills.
+install even when it lands zero skills. The guard makes that failure loud and
+registers nothing.
+
+The healthy case also asserts that no slash command is registered: the
+host's own ``/<skill-name>`` dispatch only answers names no plugin has
+claimed, so registering ``/sepia`` would shadow the injection that actually
+builds an agent.
 
 Standard library only, like the rest of the suite. The module is imported by
 path and the host API is a recording stub, so ``agentscope`` never enters the
@@ -67,47 +70,8 @@ def build_package(root, skills, follow_symlink=True):
     return link
 
 
-class SplitFlagsCase(unittest.TestCase):
-    """The untrusted-data boundary of /sepia."""
-
-    def split(self, raw):
-        return plugin._split_flags(raw)
-
-    def test_plain_text_is_untouched(self):
-        self.assertEqual(self.split("tighten this paragraph"),
-                         ("tighten this paragraph", {}))
-
-    def test_trailing_op_is_split_off(self):
-        self.assertEqual(self.split("fix the ending --op review"),
-                         ("fix the ending", {"op": "review"}))
-
-    def test_flag_looking_text_mid_sentence_is_data(self):
-        text, flags = self.split("--op recreate this sentence too --op write")
-        self.assertEqual(flags, {"op": "write"})
-        self.assertEqual(text, "--op recreate this sentence too")
-
-    def test_repeated_flag_keeps_the_rightmost(self):
-        self.assertEqual(self.split("text --op write --op review"),
-                         ("text", {"op": "review"}))
-
-    def test_terminator_protects_an_option_looking_tail(self):
-        text, flags = self.split("please preserve --op recreate --")
-        self.assertEqual(text, "please preserve --op recreate")
-        self.assertEqual(flags, {})
-
-    def test_malformed_value_reaches_validation_instead_of_text(self):
-        text, flags = self.split("prose --op de2")
-        self.assertEqual(text, "prose")
-        self.assertEqual(flags, {"op": "de2"})
-        self.assertNotIn("de2", text)
-
-    def test_language_is_normalised(self):
-        self.assertEqual(self.split("prose --lang ZH"),
-                         ("prose", {"lang": "zh"}))
-
-
 class RegisterCase(unittest.TestCase):
-    """What happens when the packaged skills do not resolve."""
+    """What the payload guard registers, healthy and broken."""
 
     def setUp(self):
         self._tmp = tempfile.TemporaryDirectory()
@@ -122,17 +86,19 @@ class RegisterCase(unittest.TestCase):
             plugin.SepiaPlugin().register(api)
         return api
 
-    def test_resolvable_package_registers_skills_and_command(self):
+    def test_resolvable_package_registers_skills_and_no_command(self):
         api = self.register_with()
         self.assertEqual(len(api.providers), 1)
-        self.assertEqual(api.commands[0][0], "sepia")
         enabled = api.providers[0][1]
         self.assertTrue(enabled["enabled_by_default"])
         self.assertEqual(enabled["channels"], ["all"])
+        # The host's own /<skill-name> dispatch serves /sepia and the five
+        # operation entries, but only while no plugin claims the name.
+        self.assertEqual(api.commands, [])
 
     def test_flattened_symlink_registers_nothing(self):
         # Silent zero-skill installs are the failure being guarded: the host
-        # would log a warning, register the command, and report success.
+        # would log a warning and report success.
         with self.assertLogs(plugin.logger, level=logging.ERROR) as logs:
             api = self.register_with(follow_symlink=False)
         self.assertEqual(api.providers, [])
@@ -148,14 +114,6 @@ class RegisterCase(unittest.TestCase):
         # message contains "sepia" for every skill, so a looser assertion would
         # pass even when the list came out empty or wrong.
         self.assertIn("(missing: sepia-hemingway)", "\n".join(logs.output))
-
-
-class PromptPathCase(unittest.TestCase):
-    """The prompt has to name files the agent can actually open."""
-
-    def test_packaged_paths_are_absolute(self):
-        for name in plugin.PACKAGED_SKILLS:
-            self.assertTrue(Path(plugin._skill_dir(name)).is_absolute(), name)
 
 
 class RepositoryPackageCase(unittest.TestCase):
